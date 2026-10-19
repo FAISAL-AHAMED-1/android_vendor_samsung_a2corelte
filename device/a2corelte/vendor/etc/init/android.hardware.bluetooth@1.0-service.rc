@@ -1,0 +1,17 @@
+service bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service
+    class hal
+    # v2.4: run as root. rfkill state write needs CAP_NET_ADMIN and the HCI thread needs CAP_SYS_NICE;
+    # neither rc 'capabilities' (3.18 kernel, no ambient caps) nor file caps reached the process.
+    # SELinux (hal_bluetooth capability net_admin/sys_nice, sysfs_bluetooth_writable) already allows both.
+    user root
+    group bluetooth net_bt_admin net_bt inet
+    writepid /dev/stune/foreground/tasks
+
+on property:vts.native_server.on=1 && property:ro.build.type=userdebug
+    stop bluetooth-1-0
+on property:vts.native_server.on=1 && property:ro.build.type=eng
+    stop bluetooth-1-0
+on property:vts.native_server.on=0 && property:ro.build.type=userdebug
+    start bluetooth-1-0
+on property:vts.native_server.on=0 && property:ro.build.type=eng
+    start bluetooth-1-0

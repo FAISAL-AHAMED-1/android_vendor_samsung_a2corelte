@@ -1,0 +1,27 @@
+# H-VENDOR v1.6 small fixes
+# GSI (Q) policy expects runtime_event_log_tags_file; ramdisk creates it as generic "device"
+# -> zygote/system_server "read event-log-tags" denials.
+on post-fs
+    restorecon /dev/event-log-tags
+
+# H-VENDOR v2.1: BT UART access for android.hardware.bluetooth (libbt-vendor opens /dev/ttySAC0)
+on post-fs
+    chown bluetooth bluetooth /dev/ttySAC0
+    chmod 0660 /dev/ttySAC0
+    chown system system /sys/class/backlight/panel/brightness
+    chmod 0664 /sys/class/backlight/panel/brightness
+
+on boot
+    chown bluetooth bluetooth /dev/ttySAC0
+    chmod 0660 /dev/ttySAC0
+    chown system system /sys/class/backlight/panel/brightness
+    chmod 0664 /sys/class/backlight/panel/brightness
+
+# H-VENDOR v3.0: all 8 cores. The v2.9 workaround capped max_online_cpu at 4 because zswap's CPU_UP_PREPARE
+# handler failed for CPU4 ("zswap: can't allocate compressor transform") and Samsung's cpuhotplug governor
+# retried forever. The v3.0 kernel is built without zswap, so CPU4-7 come online normally.
+on post-fs
+    write /sys/power/cpuhotplug/max_online_cpu 8
+
+on boot
+    write /sys/power/cpuhotplug/max_online_cpu 8
